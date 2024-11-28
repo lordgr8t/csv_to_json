@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер Excel в JSON</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>Конвертер Excel в JSON</h1>
+    <input type="file" id="excelFileInput" accept=".xls,.xlsx" />
+    <button id="convertButton">Конвертировать</button>
+    
+    <h2>Результат:</h2>
+    <pre id="jsonOutput"></pre>
+
+    <script>
+        document.getElementById('convertButton').addEventListener('click', function () {
+            const fileInput = document.getElementById('excelFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Пожалуйста, выберите Excel файл.");
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Получаем первую страницу (лист) из книги
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // Конвертируем лист в JSON
+                const jsonOutput = XLSX.utils.sheet_to_json(worksheet, { raw: false }); // raw: false для правильной обработки текста
+
+                // Отображаем результат
+                document.getElementById('jsonOutput').textContent = JSON.stringify(jsonOutput, null, 2);
+            };
+
+            // Читаем файл как массив байтов
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
